@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useWebSocket } from "@/shared/hooks/useWebSocket";
 import { Header } from "@/shared/components/Header";
 import { NotificationStack } from "@/shared/components/NotificationStack";
@@ -9,6 +9,7 @@ import { OrderBookPage } from "@/features/order-book/OrderBookPage";
 import { WatchlistPage } from "@/features/dashboard/WatchlistPage";
 import { useUIStore } from "@/store/ui.store";
 import { AUTH_TOKEN_STORAGE_KEY } from "@/services/api/auth";
+import { AUTH_EXPIRED_EVENT } from "@/services/api/auth/config";
 import { Header2 } from "@/shared/components/Header2";
 
 function TradingApp({ onLogout }: { onLogout: () => void }) {
@@ -99,6 +100,15 @@ function TradingApp({ onLogout }: { onLogout: () => void }) {
 
 export default function App() {
   const [token, setToken] = useState<string>(() => localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) ?? "");
+  
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      setToken("");
+    };
+
+    window.addEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
+    return () => window.removeEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
+  }, []);
 
   const isAuthenticated = useMemo(() => token.length > 0, [token]);
 

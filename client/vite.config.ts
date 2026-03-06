@@ -8,20 +8,20 @@ export default defineConfig({
   resolve: {
     alias: { "@": "/src" },
   },
-  server: {
-    proxy: {
-      // Proxies /v1/api requests to the OmneNest server
-      "/v1": {
-        target: "https://preprodapisix.omnenest.com",
-        changeOrigin: true,
-        secure: false,
-      },
-      // Proxies /v2/api requests to the OmneNest server
-      "/v2": {
-        target: "https://preprodapisix.omnenest.com",
-        changeOrigin: true,
-        secure: false,
-      },
+ server: {
+  proxy: {
+    "/v1": {
+      target: "https://preprodapisix.omnenest.com",
+      changeOrigin: true,
+      secure: false,
+      rewrite: (path) => path
     },
+    "/v2": {
+      target: "https://preprodapisix.omnenest.com",
+      changeOrigin: true,
+      secure: false,
+      rewrite: (path) => path
+    }
+  }
   },
 });

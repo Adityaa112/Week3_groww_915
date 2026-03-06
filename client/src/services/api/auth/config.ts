@@ -5,6 +5,8 @@ import axios, { AxiosHeaders } from "axios";
 // Change this to an empty string so requests go to localhost:5173/v1/...
 const AUTH_BASE_URL = ""; 
 const AUTH_TOKEN_STORAGE_KEY = "authToken";
+const AUTH_EXPIRED_EVENT = "auth-expired";
+let authExpiryHandled = false;
 
 const authConfig = {
   baseUrl: AUTH_BASE_URL,
@@ -49,4 +51,17 @@ authClient.interceptors.request.use((requestConfig) => {
   return requestConfig;
 });
 
-export { authClient, authConfig, getAuthHeaders, AUTH_TOKEN_STORAGE_KEY };
+authClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error?.response?.status;
+    if ((status === 401 || status === 412) && !authExpiryHandled) {
+      authExpiryHandled = true;
+      localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+      window.dispatchEvent(new Event(AUTH_EXPIRED_EVENT));
+    }
+    return Promise.reject(error);
+  }
+);
+
+export { authClient, authConfig, getAuthHeaders, AUTH_TOKEN_STORAGE_KEY, AUTH_EXPIRED_EVENT };
