@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { useWebSocket } from "@/shared/hooks/useWebSocket";
 import { Header } from "@/shared/components/Header";
 import { NotificationStack } from "@/shared/components/NotificationStack";
@@ -6,31 +7,14 @@ import { DashboardPage } from "@/pages/DashboardPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { PortfolioPage } from "@/features/portfolio-overview/PortfolioPage";
 import { OrderBookPage } from "@/features/order-book/OrderBookPage";
-import { WatchlistPage } from "@/features/dashboard/WatchlistPage";
-import { useUIStore } from "@/store/ui.store";
 import { AUTH_TOKEN_STORAGE_KEY } from "@/services/api/auth";
 import { AUTH_EXPIRED_EVENT } from "@/services/api/auth/config";
 import { Header2 } from "@/shared/components/Header2";
+import WatchlistPage from "@/pages/WatchlistPage";
+import WatchlistDetailPage from "@/pages/WatchlistDetailPage";
 
 function TradingApp({ onLogout }: { onLogout: () => void }) {
   useWebSocket();
-
-  const activeTab = useUIStore((s) => s.activeTab);
-
-  const renderTab = () => {
-    switch (activeTab) {
-      case "dashboard":
-        return <DashboardPage />;
-      case "portfolio":
-        return <PortfolioPage />;
-      case "orderbook":
-        return <OrderBookPage />;
-      case "watchlist":
-        return <WatchlistPage />;
-      default:
-        return <DashboardPage />;
-    }
-  };
 
   return (
     <div
@@ -53,7 +37,13 @@ function TradingApp({ onLogout }: { onLogout: () => void }) {
           position: "relative",
         }}
       >
-        {renderTab()}
+        <Routes>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/portfolio" element={<PortfolioPage />} />
+          <Route path="/orderbook" element={<OrderBookPage />} />
+          <Route path="/watchlist" element={<WatchlistPage />} />
+          <Route path="/watchlist/:id" element={<WatchlistDetailPage />} />
+        </Routes>
       </main>
 
       <footer
@@ -73,8 +63,10 @@ function TradingApp({ onLogout }: { onLogout: () => void }) {
         }}
       >
         <span>ws://localhost:8080</span>
+
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <span>Groww-915 - Simulated data - for learning only</span>
+
           <button
             onClick={onLogout}
             style={{
@@ -99,15 +91,19 @@ function TradingApp({ onLogout }: { onLogout: () => void }) {
 }
 
 export default function App() {
-  const [token, setToken] = useState<string>(() => localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) ?? "");
-  
+  const [token, setToken] = useState<string>(
+    () => localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) ?? ""
+  );
+
   useEffect(() => {
     const handleAuthExpired = () => {
       setToken("");
     };
 
     window.addEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
-    return () => window.removeEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
+
+    return () =>
+      window.removeEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
   }, []);
 
   const isAuthenticated = useMemo(() => token.length > 0, [token]);
@@ -124,11 +120,19 @@ export default function App() {
   }
 
   return (
-    <TradingApp
-      onLogout={() => {
-        localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
-        setToken("");
-      }}
-    />
+    <Routes>
+      <Route
+        path="/*"
+        element={
+          <TradingApp
+            onLogout={() => {
+              localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+              setToken("");
+            }}
+          />
+        }
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }

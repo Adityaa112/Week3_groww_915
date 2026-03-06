@@ -1,8 +1,11 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDashboardStore } from "@/store/dashboard.store";
 import { useMarketStatusStore } from "@/store";
 
 export function Header2() {
+  const navigate = useNavigate();
+
   const { features, loadDashboard, loading } = useDashboardStore();
   const markets = useMarketStatusStore((s) => s.markets);
   const loadMarketStatus = useMarketStatusStore((s) => s.loadMarketStatus);
@@ -17,15 +20,21 @@ export function Header2() {
     return () => clearInterval(interval);
   }, [loadMarketStatus]);
 
-  useEffect(() => {
-    if (features.length > 0) {
-      console.log("Dashboard Features:", features);
+  const handleFeatureClick = (featureName: string) => {
+    const name = featureName.toLowerCase();
 
-      features.forEach((f, i) => {
-        console.log(`Feature ${i + 1}:`, f.name);
-      });
+    if (name === "watchlist") {
+      navigate("/watchlist");
     }
-  }, [features]);
+
+    if (name === "portfolio") {
+      navigate("/portfolio");
+    }
+
+    if (name === "orders") {
+      navigate("/orders");
+    }
+  };
 
   return (
     <div
@@ -45,6 +54,7 @@ export function Header2() {
           features.map((feature) => (
             <button
               key={feature.name}
+              onClick={() => handleFeatureClick(feature.name)}
               style={{
                 background: "transparent",
                 border: "1px solid var(--border)",

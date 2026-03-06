@@ -2,26 +2,26 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
-  base: "/Week3_groww_915/",
+  base: mode === "development" ? "/" : "/Week3_groww_915/",
   resolve: {
     alias: { "@": "/src" },
   },
- server: {
-  proxy: {
-    "/v1": {
-      target: "https://preprodapisix.omnenest.com",
-      changeOrigin: true,
-      secure: false,
-      rewrite: (path) => path
+  server: {
+    proxy: {
+      "/v1": {
+        target: "https://preprodapisix.omnenest.com",
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path,
+      },
+      "/v2": {
+        target: "https://preprodapisix.omnenest.com",
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path,
+      },
     },
-    "/v2": {
-      target: "https://preprodapisix.omnenest.com",
-      changeOrigin: true,
-      secure: false,
-      rewrite: (path) => path
-    }
-  }
   },
-});
+}));
