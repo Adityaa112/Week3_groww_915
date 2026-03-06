@@ -1,0 +1,46 @@
+name: Deploy to GitHub Pages1
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          # Point to the lock file inside 'client'
+          cache-dependency-path: './client/package-lock.json'
+
+      - name: Install and Build
+        # Set the working directory so npm finds package.json
+        run: |
+          npm ci
+          npm run build
+        working-directory: ./client
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Point to the dist folder inside 'client'
+          path: client/dist
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-deploy
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
