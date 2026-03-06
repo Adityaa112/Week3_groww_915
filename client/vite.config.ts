@@ -9,4 +9,20 @@ export default defineConfig({
   resolve: {
     alias: { "@": "/src" },
   },
+ server: {
+  proxy: {
+    "/v1": {
+      target: "https://preprodapisix.omnenest.com",
+      changeOrigin: true,
+      secure: false,
+      rewrite: (path) => path
+    },
+    "/v2": {
+      target: "https://preprodapisix.omnenest.com",
+      changeOrigin: true,
+      secure: false,
+      rewrite: (path) => path
+    }
+  }
+  },
 });
