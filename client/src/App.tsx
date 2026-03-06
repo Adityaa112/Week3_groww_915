@@ -9,6 +9,7 @@ import { OrderBookPage } from "@/features/order-book/OrderBookPage";
 import { WatchlistPage } from "@/features/dashboard/WatchlistPage";
 import { useUIStore } from "@/store/ui.store";
 import { AUTH_TOKEN_STORAGE_KEY } from "@/services/api/auth";
+import { Header2 } from "@/shared/components/Header2";
 
 function TradingApp({ onLogout }: { onLogout: () => void }) {
   useWebSocket();
@@ -41,6 +42,7 @@ function TradingApp({ onLogout }: { onLogout: () => void }) {
       }}
     >
       <Header />
+      <Header2 />
 
       <main
         style={{
