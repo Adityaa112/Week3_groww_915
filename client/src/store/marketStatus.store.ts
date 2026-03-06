@@ -28,7 +28,8 @@ export const useMarketStatusStore = create<MarketStatusState>((set) => ({
       } else {
         console.error("Market status error", err);
       }
-      set({ loading: false });
+      // Never keep stale OPEN/CLOSE values when refresh fails.
+      set({ markets: [], loading: false });
     }
   },
 }));
